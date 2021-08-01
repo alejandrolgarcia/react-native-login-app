@@ -1,14 +1,18 @@
-import React from 'react';
-import { View, Text, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, Keyboard } from 'react-native';
+import React, { useContext, useEffect } from 'react';
+import { View, Text, KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, Keyboard, Alert } from 'react-native';
+import { StackScreenProps } from '@react-navigation/stack';
 
-import { loginStyles } from '../theme/loginTheme';
 import { WhiteImage } from '../components/WhiteImage';
 import { useForm } from '../hooks/useForm';
-import { StackScreenProps } from '@react-navigation/stack';
+import { AuthContext } from '../context/AuthContext';
+
+import { loginStyles } from '../theme/loginTheme';
 
 interface Props extends StackScreenProps<any, any>{}
 
 export const RegisterScreen = ( { navigation }: Props ) => {
+
+    const { signUp, errorMessage, removeError } = useContext(AuthContext);
 
     const { email, password, name, onChange } = useForm({
         name: '',
@@ -16,9 +20,27 @@ export const RegisterScreen = ( { navigation }: Props ) => {
         password: ''
     });
 
+    useEffect(() => {
+        if (errorMessage.length === 0) return;
+
+        Alert.alert(
+            'Login incorrecto',
+            errorMessage,
+            [
+                {
+                    text: 'Ok',
+                    onPress: removeError
+                }
+            ]
+        );
+
+    }, [errorMessage]);
+
     const onRegister = () => {
         console.log({ name, email, password });
         Keyboard.dismiss();
+
+        signUp({ nombre: name , correo: email, password });
     }
 
     return (
@@ -47,7 +69,7 @@ export const RegisterScreen = ( { navigation }: Props ) => {
                         selectionColor="white"
 
                         // TODO
-                        onChangeText={ (value) => onChange(value, 'email' ) }
+                        onChangeText={ (value) => onChange(value, 'name' ) }
                         value={ name }
                         onSubmitEditing={ onRegister }
                         
